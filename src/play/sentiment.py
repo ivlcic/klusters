@@ -8,10 +8,10 @@ from typing import List
 
 import pandas as pd
 
-from neuroticla import CommonArguments
-from neuroticla.esdl import Elastika, Article
-from neuroticla.play.corpus.__embed import _filter_body
-from neuroticla.play.corpus.__utils import filter_article
+from .. import CommonArguments
+from ..esdl import Elastika, Article
+from .corpus.__embed import _filter_body
+from .corpus.__utils import filter_article
 
 logger = logging.getLogger('play.sentiment.dump')
 

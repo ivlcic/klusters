@@ -27,5 +27,6 @@ else:  # Other operating systems (Linux, macOS, etc.)
 
 # Update the PATH environment variable
 os.environ['PATH'] = venv_bin_dir + os.pathsep + os.environ['PATH']
-os.environ['CURR_DIR'] = current_script_dir
 load_dotenv()
+
+#### THIS FILE IS NEEDED BECAUSE PYTHON SUCKS AND WINTENDOWS ALSO

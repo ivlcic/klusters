@@ -6,7 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from neuroticla.play.corpus.__utils import load_range, State
+from .__utils import load_range, State
 
 logger = logging.getLogger('play.cluster.stats')
 

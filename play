@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from neuroticla.core import ExecModule
+from src.core import ExecModule
 
 
 if __name__ == "__main__":

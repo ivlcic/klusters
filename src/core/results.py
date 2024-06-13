@@ -5,7 +5,7 @@ import pandas as pd
 
 from typing import Dict, Any, Union, List
 
-from neuroticla.core.labels import Labeler
+from .labels import Labeler
 
 
 class NpEncoder(json.JSONEncoder):

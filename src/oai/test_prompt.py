@@ -3,10 +3,9 @@ import json
 from argparse import ArgumentParser
 
 from openai import OpenAI
-import tiktoken
 
-from neuroticla.oai.constants import MODEL_TOKENS, MODEL_ABBREV
-from neuroticla.oai.tokenize import create_chunks
+from .constants import MODEL_TOKENS, MODEL_ABBREV
+from .tokenize import create_chunks
 
 
 def add_args(module_name: str, parser: ArgumentParser) -> None:
