@@ -234,6 +234,7 @@ class Elastika:
     def get(self, start: datetime, end: datetime = None) -> List[Article]:
         if not end:
             end = start + timedelta(hours=24)
+        self._filters = []
         query = self._query_tpl.replace('<from>', str(self._offset))
         query = query.replace('<size>', str(self._limit))
         query = query.replace('<date_start>', start.astimezone().isoformat())

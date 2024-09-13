@@ -11,7 +11,7 @@ import requests
 from transformers import AutoTokenizer, AutoModel
 
 from .__embed import _embed, _filter_body
-from .__utils import load_range, State, Params, filter_article, traverse_article_tags
+from .__utils import load_range, State, Params, filter_article, traverse_article_tags, fs_range
 from ...esdl import Elastika
 from ...esdl.article import Article
 
@@ -49,6 +49,58 @@ def dump(arg) -> int:
 
     state = load_range(params, callback)
 
+    logger.info(
+        "Dumping [%s] files [%s::%s] ", state.total, state.start, state.end
+    )
+    return 0
+
+
+def dump_raw(arg) -> int:
+    '''
+    ./play corpus dump_raw -s 2024-01-01 -e 2024-02-01 asdas
+    '''
+    params = Params(arg.start_date, arg.end_date, [], arg.result_dir)
+    params.requests = Elastika()
+    params.requests.limit(9999)
+    params.requests.filter_country('SI')
+    params.requests.filter_media_type('799dea91-d6a6-380a-8f07-f601cc1665a1')
+    params.requests.field(['rubric', 'url', 'rates'])
+
+    # noinspection PyUnusedLocal
+    dump_table = {
+        'uuid': [],
+        'created': [],
+        'm_name': [],
+        'country': [],
+        'lang': [],
+        'title': [],
+        'body': [],
+    }
+    my_state = {'count': 0}
+    def callback(s: State, saved: Dict[str, Any], article: Article) -> int:
+        dump_table['uuid'].append(article.uuid)
+        dump_table['created'].append(article.created)
+        dump_table['m_name'].append(article.media)
+        dump_table['country'].append(article.country)
+        dump_table['lang'].append(article.language)
+        dump_table['title'].append(article.title)
+        dump_table['body'].append(article.body)
+        if s.total > 0 and s.total % 200000 == 0:
+            my_state['count'] += 1
+            pd.DataFrame(dump_table).to_csv(f'dump_{arg.start_date}_{my_state["count"]}.csv', index=False)
+            dump_table['uuid'] = []
+            dump_table['created'] = []
+            dump_table['m_name'] = []
+            dump_table['country'] = []
+            dump_table['lang'] = []
+            dump_table['title'] = []
+            dump_table['body'] = []
+        return 1
+
+    state = fs_range(params, callback)
+
+    my_state['count'] += 1
+    pd.DataFrame(dump_table).to_csv(f'dump_{arg.start_date}_{my_state["count"]}.csv', index=False)
     logger.info(
         "Dumping [%s] files [%s::%s] ", state.total, state.start, state.end
     )
