@@ -133,34 +133,39 @@ def prompt_seba(arg) -> int:
     )
     wb.save(file_name)
 
-    system = '''
+    system_prompt = '''
     Pripravi povzetek glavnih zgodb, izpostavi ključne ugotovitve in morebitne negativne vsebine.
     '''
 
-    asistant = '''
-    
+    asistant_prompt = '''
+
     '''
 
     clusters = True
+    user_prompt = ''
     if clusters:
-        instruct = ''
         for k in e5_l_clusters.keys():
             articles: List[Article] = e5_l_clusters[k]
             for x, a in enumerate(articles):
-                instruct += a.title + '\n'
-                instruct += a.body + '\n\n\n\n'
+                # user_prompt += a.title + '\n'
+                # user_prompt += a.body + '\n\n\n\n'
+                user_prompt += f'Article {x}: \n'
+                # user_prompt += f'Article {x}: \n' + a.title + '\n'
+                user_prompt += f'Source: ' + a.media + '\n'
+                user_prompt += a.body + '\n\n\n\n'
     else:
-        instruct = ''
-        for a in articles:
-            instruct += a.title + '\n'
-            instruct += a.body + '\n\n\n\n'
+        for x, a in enumerate(articles):
+            user_prompt += f'Article {x}: \n'
+            # user_prompt += f'Article {x}: \n' + a.title + '\n'
+            user_prompt += f'Source: ' + a.media + '\n'
+            user_prompt += a.body + '\n\n\n\n'
 
     messages = [
-        {"role": "system", "content": system}
+        {"role": "system", "content": system_prompt}
     ]
-    if asistant:
-        messages.append({"role": "assistant", "content": asistant})
-    messages.append({"role": "user", "content": instruct})
+    if asistant_prompt:
+        messages.append({"role": "assistant", "content": asistant_prompt})
+    messages.append({"role": "user", "content": user_prompt})
 
     client = OpenAI()
     response = client.chat.completions.create(
