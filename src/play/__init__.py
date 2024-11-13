@@ -6,6 +6,7 @@ MODULE_DESCRIPTOR = ModuleDescriptor(
     'Playground module',
     ModuleArguments([
         CommandArguments('cluster', 'Cluster compare', multi_action=True),
+        CommandArguments('prompt', 'Cluster prompt', multi_action=True),
         CommandArguments('corpus', 'Corpus management', multi_action=True),
         CommandArguments('sentiment', 'Sentiment corpus', multi_action=True)
     ])
