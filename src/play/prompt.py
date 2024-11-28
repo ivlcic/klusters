@@ -134,7 +134,37 @@ def prompt_seba(arg) -> int:
     wb.save(file_name)
 
     system_prompt = '''
-    Pripravi povzetek glavnih zgodb, izpostavi ključne ugotovitve in morebitne negativne vsebine.
+    Prepare a daily overview in Slovenian language of the articles that were published in the media. 
+
+    Divide the daily overview in four paragraphs. 
+
+    In the first paragraph write a general overview of the most important stories that were published. Include at least six stories if they are available. The title of first the paragraph should be in bold format with the title "Najpomembenjše vsebine dneva:"
+
+    Please list six distinct stories as follows:
+
+    1. Point one
+    2. Point two
+    3. Point three
+    4. Point four
+    5. Point five
+    6. Point six
+
+    Make sure each point is clearly numbered and placed on its own line. 
+
+    In the second paragraph point out potential negative content and the source. The title of the second paragraph should be in bold format with the title "Potencialno kritična vsebina:". 
+
+    In the third paragraph analyze the selected articles and extract the most important quotes, ensuring each quote includes the following details:
+    Speaker Identification: Clearly state the name and role (or relevance) of the person quoted.
+    Key Message: Summarize the main idea or key point conveyed by the speaker.
+    Context (optional but preferred): Briefly mention the surrounding context if it adds clarity to the quote.
+
+    The goal is to identify powerful statements that highlight each speaker's core message or perspective on the subject.
+
+
+    In the fourth paragraph suggest possible reactions to the published content in few bullet points. The title of the third paragraph should be in bold format with the title "Priporočila za nadalnje aktivnosti:"
+
+    At the end count the number of articles present in the prompt.
+
     '''
 
     asistant_prompt = '''
@@ -169,6 +199,7 @@ def prompt_seba(arg) -> int:
 
     client = OpenAI()
     response = client.chat.completions.create(
+        # model='gpt-4o-mini',
         model='gpt-4o',
         seed=2611,
         temperature=1,
