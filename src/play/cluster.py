@@ -6,12 +6,14 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Dict
 
 from .corpus.__utils import Params, State, load_range
-from .e5 import e5_embed, e5_embed_text
 from .utils import compare_clusterings, cluster_louvain, cluster_print, cluster_create_wb, cluster_print_sheet
 from .. import CommonArguments
 from ..esdl import Elastika
 from ..esdl.article import Article
 from ..oai.embed import openai_embed
+from .e5 import e5_embed, e5_embed_text
+from .bge_m3 import bgem3_embed
+from .jina3 import jina3_embed
 
 logger = logging.getLogger('play.cluster')
 
@@ -73,12 +75,16 @@ def cluster_compare(arg) -> int:
     articles: List[Article] = _get_articles(arg)
     openai_embed(articles, 'oai_ada_002', a_dir, arg.fields)
     e5_embed(articles, 'e5', arg.tmp_dir, arg.fields, arg.e5_large)
+    bgem3_embed(articles, 'bgem3', arg.tmp_dir, arg.fields)
+    jina3_embed(articles, 'jina3', arg.tmp_dir, arg.fields)
 
     if arg.customer in cmap.keys():
         arg.customer = cmap[arg.customer]
 
     oai_l_clusters = cluster_louvain(articles, 'oai_ada_002', 0.92)
     e5_l_clusters = cluster_louvain(articles, 'e5', 0.91)
+    bgem3_l_clusters = cluster_louvain(articles, 'bgem3', 0.91)
+    jina3_l_clusters = cluster_louvain(articles, 'jina3', 0.91)
     append = ''
     if arg.e5_large:
         append = '_large'
@@ -90,6 +96,31 @@ def cluster_compare(arg) -> int:
     print('')
     print('==========================   E5   ========================== ')
     cluster_print(e5_l_clusters, os.path.join(arg.tmp_dir, 'E5-' + f_prefix + '.txt'))
+
+    print('')
+    print('==========================   BGE-M3   ========================== ')
+    cluster_print(bgem3_l_clusters, os.path.join(arg.tmp_dir, 'BGE_M3-' + f_prefix + '.txt'))
+
+    print('')
+    print('==========================   Jina3   ========================== ')
+    cluster_print(jina3_l_clusters, os.path.join(arg.tmp_dir, 'Jina3-' + f_prefix + '.txt'))
+
+    wb = cluster_create_wb()
+    cluster_print_sheet(wb, "OpenAI", oai_l_clusters)
+    cluster_print_sheet(wb, "E5", e5_l_clusters)
+    cluster_print_sheet(wb, "BGE-M3", bgem3_l_clusters)
+    cluster_print_sheet(wb, "Jina", jina3_l_clusters)
+
+    logger.info(
+        "Done [%s] clusters [%s from %s::%s] ",
+        len(e5_l_clusters), arg.customer, arg.start_date, arg.end_date
+    )
+
+    file_name = os.path.join(
+        arg.tmp_dir, f'{f_prefix}.xlsx'
+    )
+    wb.save(file_name)
+
     return 0
 
 

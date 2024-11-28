@@ -6,6 +6,8 @@ tiktoken>=0.7.0
 openai>=1.34.0
 transformers>=4.41.2
 sentence-transformers>=3.0.1
+FlagEmbedding==1.2.10
+flash-attn>=2.7.0
 networkx>=3.3
 requests>=2.32.3
 jupyter>=1.0.0

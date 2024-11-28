@@ -3,7 +3,7 @@ import os.path
 
 import torch.nn.functional as functional
 
-from typing import List, Union
+from typing import List, Union, Optional
 from torch import Tensor
 from transformers import AutoTokenizer, AutoModel
 
@@ -38,7 +38,7 @@ def e5_embed_text(tmp_dir: str, text):
 
 
 def e5_embed(articles: List[Article], embed_field_name: str, tmp_dir: str, fields: str = None,
-             large_model: bool = False, cache: Union[str, None] = None):
+             large_model: bool = False, cache: Optional[str] = None):
     if embed_field_name.startswith('efed'):
         model_name = 'efederici/e5-base-multilingual-4096'
         max_len = 4096
