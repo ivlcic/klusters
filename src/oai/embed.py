@@ -27,8 +27,12 @@ def openai_embed(articles: List[Article], embed_field_name: str, cache: Union[st
             EMBEDDING_ENCODING,
             EMBEDDING_CTX_LENGTH
         )
+        if '002' in embed_field_name:
+            model = 'text-embedding-ada-002'
+        else:
+            model = 'text-embedding-3-small'
         embedding = openai.embeddings.create(  # call OpenAI
-            input=tokens, model="text-embedding-ada-002"
+            input=tokens, model=model
         )
         logger.info('Loaded %s article OpenAI embedding.', a)
         a.data[embed_field_name] = embedding.data[0].embedding  # extract vector from response

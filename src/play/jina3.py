@@ -1,19 +1,23 @@
 import logging
 import os.path
+import torch
+
 from typing import List, Union
 
 from transformers import AutoModel
 
 from ..esdl.article import Article
 
-logger = logging.getLogger('bgem3.embed')
+logger = logging.getLogger('jina3.embed')
 
 
 def jina3_embed_text(tmp_dir: str, text):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AutoModel.from_pretrained(
-        'jinaai/jina-embeddings-v3', trust_remote_code=True,
-        device_map='auto', cache_dir=os.path.join(tmp_dir, 'jina3')
+        'jinaai/jina-embeddings-v3',
+        trust_remote_code=True, cache_dir=os.path.join(tmp_dir, 'jina3')
     )
+    model.to(device)
     embeddings = model.encode([text])['dense_vecs']
     return embeddings[0].tolist()
 
@@ -22,10 +26,12 @@ def jina3_embed_text(tmp_dir: str, text):
 def jina3_embed(articles: List[Article], embed_field_name: str, tmp_dir: str, fields: str = None,
                 cache: Union[str, None] = None):
     os.environ['HF_HOME'] = tmp_dir  # local tmp dir set cache
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = AutoModel.from_pretrained(
-        'jinaai/jina-embeddings-v3', trust_remote_code=True,
-        device_map='auto', cache_dir=os.path.join(tmp_dir, 'jina3')
+        'jinaai/jina-embeddings-v3',
+        trust_remote_code=True, cache_dir=os.path.join(tmp_dir, 'jina3')
     )
+    model.to(device)
 
     for a in articles:
         if cache is not None and a.from_cache(cache):  # read from file

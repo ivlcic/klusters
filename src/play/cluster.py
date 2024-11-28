@@ -74,6 +74,7 @@ def cluster_compare(arg) -> int:
 
     articles: List[Article] = _get_articles(arg)
     openai_embed(articles, 'oai_ada_002', a_dir, arg.fields)
+    openai_embed(articles, 'oai_ada_003', a_dir, arg.fields)
     e5_embed(articles, 'e5', arg.tmp_dir, arg.fields, arg.e5_large)
     bgem3_embed(articles, 'bgem3', arg.tmp_dir, arg.fields)
     jina3_embed(articles, 'jina3', arg.tmp_dir, arg.fields)
@@ -81,17 +82,22 @@ def cluster_compare(arg) -> int:
     if arg.customer in cmap.keys():
         arg.customer = cmap[arg.customer]
 
-    oai_l_clusters = cluster_louvain(articles, 'oai_ada_002', 0.92)
+    oai2_l_clusters = cluster_louvain(articles, 'oai_ada_002', 0.92)
+    oai3_l_clusters = cluster_louvain(articles, 'oai_ada_003', 0.92)
     e5_l_clusters = cluster_louvain(articles, 'e5', 0.91)
-    bgem3_l_clusters = cluster_louvain(articles, 'bgem3', 0.91)
-    jina3_l_clusters = cluster_louvain(articles, 'jina3', 0.91)
+    bgem3_l_clusters = cluster_louvain(articles, 'bgem3', 0.81)
+    jina3_l_clusters = cluster_louvain(articles, 'jina3', 0.81)
     append = ''
     if arg.e5_large:
         append = '_large'
     f_prefix = arg.customer + append + '_' + arg.fields + '_' + arg.start_date + '_' + arg.end_date
     print('')
-    print('========================== OpenAI ========================== ')
-    cluster_print(oai_l_clusters, os.path.join(arg.tmp_dir, 'OpenAI-' + f_prefix + '.txt'))
+    print('========================== OpenAI 2 ========================== ')
+    cluster_print(oai2_l_clusters, os.path.join(arg.tmp_dir, 'OpenAI-2-' + f_prefix + '.txt'))
+
+    print('')
+    print('========================== OpenAI 3 ========================== ')
+    cluster_print(oai2_l_clusters, os.path.join(arg.tmp_dir, 'OpenAI-3-' + f_prefix + '.txt'))
 
     print('')
     print('==========================   E5   ========================== ')
@@ -106,10 +112,11 @@ def cluster_compare(arg) -> int:
     cluster_print(jina3_l_clusters, os.path.join(arg.tmp_dir, 'Jina3-' + f_prefix + '.txt'))
 
     wb = cluster_create_wb()
-    cluster_print_sheet(wb, "OpenAI", oai_l_clusters)
-    cluster_print_sheet(wb, "E5", e5_l_clusters)
-    cluster_print_sheet(wb, "BGE-M3", bgem3_l_clusters)
+    cluster_print_sheet(wb, "OpenAI-3", oai3_l_clusters)
+    cluster_print_sheet(wb, "OpenAI-2", oai2_l_clusters)
     cluster_print_sheet(wb, "Jina", jina3_l_clusters)
+    cluster_print_sheet(wb, "BGE-M3", bgem3_l_clusters)
+    cluster_print_sheet(wb, "E5", e5_l_clusters)
 
     logger.info(
         "Done [%s] clusters [%s from %s::%s] ",
