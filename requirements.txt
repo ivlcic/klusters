@@ -4,10 +4,9 @@ torch>=2.4.1  # pip install torch torchvision torchaudio --index-url https://dow
 scikit-learn>=1.5.0
 tiktoken>=0.7.0
 openai>=1.34.0
-transformers==4.45.1
+transformers==4.44.2
 sentence-transformers>=3.0.1
-FlagEmbedding==1.2.10
-flash-attn>=2.7.0
+FlagEmbedding==1.2.11
 networkx>=3.3
 requests>=2.32.3
 jupyter>=1.0.0
@@ -19,3 +18,4 @@ stanza>=1.8.2
 obeliks>=1.1.6
 reldi-tokeniser>=1.0.3
 evaluate>=0.4.2
+flash-attn>=2.7.0

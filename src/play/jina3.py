@@ -1,6 +1,7 @@
 import logging
 import os.path
 import torch
+import time
 
 from typing import List, Union
 
@@ -32,20 +33,22 @@ def jina3_embed(articles: List[Article], embed_field_name: str, tmp_dir: str, fi
         trust_remote_code=True, cache_dir=os.path.join(tmp_dir, 'jina3')
     )
     model.to(device)
-
+    start = time.perf_counter()
     for a in articles:
         if cache is not None and a.from_cache(cache):  # read from file
             if embed_field_name in a.data:  # we already did the embedding ($$$$)
                 logger.debug('Loaded %s article Jina3 embedding from cache.', a)
                 continue
-        logger.debug('Loading %s article Jina3 embedding ...', a)
+        logger.debug('Computing %s article Jina3 embedding ...', a)
         text = a.title + ' ' + a.body
         if fields == 'b':
             text = a.body
             if not text or not text.strip():
                 text = a.title
         embeddings = model.encode([text], task='text-matching', show_progress_bar=False)
-        logger.info('Loaded %s article Jina3 embedding.', a)
+        logger.info('Computed %s article Jina3 embedding.', a)
         a.data[embed_field_name] = embeddings[0].tolist()
         if cache:
             a.to_cache(cache)  # cache article to file
+
+    logger.info(f'Computed Jina3 embeddings in [{((time.perf_counter() - start) * 1000):.3f}]ms.')

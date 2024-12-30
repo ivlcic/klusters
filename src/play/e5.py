@@ -1,9 +1,9 @@
 import logging
 import os.path
+import time
+import torch
 
-import torch.nn.functional as functional
-
-from typing import List, Union, Optional
+from typing import List, Optional
 from torch import Tensor
 from transformers import AutoTokenizer, AutoModel
 
@@ -18,13 +18,14 @@ def _average_pool(last_hidden_states: Tensor, attention_mask: Tensor) -> Tensor:
 
 
 def _e5_embed(tokenizer, model, text, max_len):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     batch_dict = tokenizer(
         ['passage: ' + text], max_length=max_len,
         padding=True, truncation=True, return_tensors='pt'
-    )
+    ).to(device)
     outputs = model(**batch_dict)
     embeddings = _average_pool(outputs.last_hidden_state, batch_dict['attention_mask'])
-    embeddings = functional.normalize(embeddings, p=2, dim=1)
+    embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
     return embeddings
 
 
@@ -34,6 +35,8 @@ def e5_embed_text(tmp_dir: str, text):
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True, cache_dir=os.path.join(tmp_dir, model_name))
     embeddings = _e5_embed(tokenizer, model, text, max_len)
+    if torch.cuda.is_available():
+        embeddings = embeddings.detach.to_cpu()
     return embeddings.tolist()[0]
 
 
@@ -52,20 +55,25 @@ def e5_embed(articles: List[Article], embed_field_name: str, tmp_dir: str, field
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModel.from_pretrained(model_name, trust_remote_code=True, cache_dir=os.path.join(tmp_dir, model_name))
+    if torch.cuda.is_available():
+        model = model.to(torch.device('cuda'))
 
+    start = time.perf_counter()
     for a in articles:
         if cache is not None and a.from_cache(cache):  # read from file
             if embed_field_name in a.data:  # we already did the embedding ($$$$)
                 logger.debug('Loaded %s article E5 embedding from cache.', a)
                 continue
-        logger.debug('Loading %s article E5 embedding ...', a)
+        logger.debug('Computing %s article E5 embedding ...', a)
         text = a.title + ' ' + a.body
         if fields == 'b':
             text = a.body
             if not text or not text.strip():
                 text = a.title
         embeddings = _e5_embed(tokenizer, model, text, max_len)
-        logger.info('Loaded %s article E5 embedding.', a)
+        logger.info('Computed %s article E5 embedding.', a)
         a.data[embed_field_name] = embeddings.tolist()[0]  # extract vector from response
         if cache:
             a.to_cache(cache)  # cache article to file
+
+    logger.info(f'Computed E5 embeddings in [{((time.perf_counter() - start) * 1000):.3f}]ms.')
