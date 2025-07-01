@@ -33,8 +33,13 @@ def add_args(module_name: str, parser: ArgumentParser) -> None:
 def corpus_dump(arg) -> int:
     return dump.dump(arg)
 
+
 def corpus_dump_raw(arg) -> int:
     return dump.dump_raw(arg)
+
+
+def corpus_dump_json(arg) -> int:
+    return dump.dump_json(arg)
 
 
 def corpus_correct_old(arg) -> int:

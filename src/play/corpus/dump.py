@@ -62,9 +62,15 @@ def dump_raw(arg) -> int:
     params = Params(arg.start_date, arg.end_date, [], arg.result_dir)
     params.requests = Elastika()
     params.requests.limit(9999)
-    params.requests.filter_country('SI')
+    params.requests.filter_country('MK')
+    params.requests.filter_language('mk')
+    params.requests.filter_media_type('06d1d4ce-90db-3e1d-af6c-a600eb25aaeb')
     params.requests.filter_media_type('799dea91-d6a6-380a-8f07-f601cc1665a1')
-    params.requests.field(['rubric', 'url', 'rates'])
+    params.requests.filter_media_type('1b97b3a7-a57e-323f-8a38-612a5b7d4403')
+    params.requests.filter_media_type('50ae60c1-3592-34cf-8cb0-0e28e91ad262')
+    params.requests.filter_media_type('f60c3d41-6061-3f03-85b8-ad8e17854265')
+    params.requests.filter_media_type('604f6dd3-7556-3bb3-b3cd-321ab3ffa3e4')
+    #params.requests.field(['rubric', 'url', 'rates'])
 
     # noinspection PyUnusedLocal
     dump_table = {
@@ -78,6 +84,8 @@ def dump_raw(arg) -> int:
     }
     my_state = {'count': 0}
     def callback(s: State, saved: Dict[str, Any], article: Article) -> int:
+        if not article.body:
+            return 1
         dump_table['uuid'].append(article.uuid)
         dump_table['created'].append(article.created)
         dump_table['m_name'].append(article.media)
@@ -101,6 +109,46 @@ def dump_raw(arg) -> int:
 
     my_state['count'] += 1
     pd.DataFrame(dump_table).to_csv(f'dump_{arg.start_date}_{my_state["count"]}.csv', index=False)
+    logger.info(
+        "Dumping [%s] files [%s::%s] ", state.total, state.start, state.end
+    )
+    return 0
+
+
+def dump_json(arg) -> int:
+    '''
+    ./play corpus dump_raw -s 2024-01-01 -e 2024-02-01 asdas
+    '''
+    params = Params(arg.start_date, arg.end_date, [], arg.result_dir)
+    params.requests = Elastika()
+    params.requests.limit(9999)
+    params.requests.filter_country('MK')
+    params.requests.filter_media_type('06d1d4ce-90db-3e1d-af6c-a600eb25aaeb')
+    params.requests.filter_media_type('799dea91-d6a6-380a-8f07-f601cc1665a1')
+    params.requests.filter_media_type('1b97b3a7-a57e-323f-8a38-612a5b7d4403')
+    params.requests.filter_media_type('50ae60c1-3592-34cf-8cb0-0e28e91ad262')
+    params.requests.filter_media_type('f60c3d41-6061-3f03-85b8-ad8e17854265')
+    params.requests.filter_media_type('604f6dd3-7556-3bb3-b3cd-321ab3ffa3e4')
+    #params.requests.field(['rubric', 'url', 'rates'])
+
+    # noinspection PyUnusedLocal
+    dump_table = {
+        'uuid': [],
+        'created': [],
+        'm_name': [],
+        'country': [],
+        'lang': [],
+        'title': [],
+        'body': [],
+    }
+    my_state = {'count': 0}
+    def callback(s: State, saved: Dict[str, Any], article: Article) -> int:
+
+        return 1
+
+    state = fs_range(params, callback)
+
+    my_state['count'] += 1
     logger.info(
         "Dumping [%s] files [%s::%s] ", state.total, state.start, state.end
     )

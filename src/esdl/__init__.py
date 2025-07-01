@@ -195,6 +195,10 @@ class Elastika:
         self._filter['country'] = code
         return self
 
+    def filter_language(self, code: str) -> TArticles:
+        self._filter['language'] = code
+        return self
+
     def filter_media_type(self, tag: str) -> TArticles:
         if not tag:
             self._filter['media_tags'] = []
